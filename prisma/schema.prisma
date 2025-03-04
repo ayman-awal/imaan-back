@@ -27,10 +27,10 @@ model Post {
   id        Int       @id @default(autoincrement())
   title     String
   question  String
-  answer    String
-  views     String
+  answer    String   @default("")
+  views     String   @default("0")
   createdAt DateTime @default(now())
-  status    String
+  status    String   @default("unpublished")
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
 }

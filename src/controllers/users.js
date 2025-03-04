@@ -1,6 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
-const jwt = require('jsonwebtoken');
 const prisma = new PrismaClient();
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
 exports.userRegister = async (req, res) => {
@@ -21,10 +21,10 @@ exports.userRegister = async (req, res) => {
             data: { name, email, password: hashedPassword, user_type }
         });
 
-        res.status(201).json({ message: 'User registered successfully', user: newUser });
+        return res.status(201).json({ message: 'User registered successfully', user: newUser });
 
     } catch (error) {
-        res.status(500).json({ message: "Something went wrong", error: error.message });
+        return res.status(500).json({ message: "Something went wrong", error: error.message });
     }
 }
 
@@ -37,13 +37,13 @@ exports.userLogin = async (req, res) => {
         });
 
         if(!existingUser){
-            res.status(400).json({ message: "Invalid email" });
+            return res.status(400).json({ message: "Invalid email" });
         }
 
         const validPassword = await bcrypt.compare(password, existingUser.password);
 
         if(!validPassword){
-            res.status(400).json({ message: "Invalid password" });
+            return res.status(400).json({ message: "Invalid password" });
         }
         const token = jwt.sign(
             { userId: existingUser.id, email: existingUser.email },
@@ -51,7 +51,7 @@ exports.userLogin = async (req, res) => {
             { expiresIn: '1h' }
         );
 
-        res.status(200).json({ message: "Login successful", token: token });
+        return res.status(200).json({ message: "Login successful", token: token });
 
     } catch (error) {
         res.status(500).json({ message: "Something went wrong", error: error.message });

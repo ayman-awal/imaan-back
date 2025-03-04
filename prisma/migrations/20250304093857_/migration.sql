@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Post" ALTER COLUMN "answer" SET DEFAULT '',
+ALTER COLUMN "views" SET DEFAULT '0';
