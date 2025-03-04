@@ -18,7 +18,7 @@ model User {
   name      String
   email     String   @unique
   password  String
-  user_type String
+  user_type String   @default("user")
   createdAt DateTime @default(now())
   posts     Post[]
 }
