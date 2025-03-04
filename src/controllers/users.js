@@ -46,7 +46,7 @@ exports.userLogin = async (req, res) => {
             return res.status(400).json({ message: "Invalid password" });
         }
         const token = jwt.sign(
-            { userId: existingUser.id, email: existingUser.email },
+            { userId: existingUser.id, email: existingUser.email, userType: existingUser.user_type },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
@@ -56,4 +56,23 @@ exports.userLogin = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "Something went wrong", error: error.message });
     }
+}
+
+exports.getProfile = async (req, res) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { email: req.email }
+        });
+    
+        const posts = await prisma.post.findMany({
+            where: { userId: req.userId }
+        });
+    
+        return res.status(200).json({ message: "Profile found", user: { name: user.name, email: user.email, posts: posts} });
+    } catch (error) {
+        return res.status(500).json({ message: "Something went wrong", error: error.message});
+    }
+
+    
+
 }
