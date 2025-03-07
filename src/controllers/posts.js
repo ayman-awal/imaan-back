@@ -1,6 +1,59 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+exports.getPublishedPosts = async (req, res) => {
+    try {
+        const posts = await prisma.post.findMany({
+            where: { status: "published" }
+        });
+        
+        if(!posts){
+            res.status(200).json({message: "No published posts yet", posts: posts});
+        }
+
+        res.status(200).json({message: "Published posts found", posts: posts});
+
+    } catch (error) {
+        res.status(500).json({message: "Something went wrong", error: error.message});
+    }
+}
+
+exports.getUnpublishedPosts = async (req, res) => {
+    try {
+        const posts = await prisma.post.findMany({
+            where: { status: "unpublished" }
+        });
+        
+        if(!posts){
+            res.status(200).json({message: "No pending posts", posts: posts});
+        }
+
+        res.status(200).json({message: "Unpublished posts found", posts: posts});
+
+    } catch (error) {
+        res.status(500).json({message: "Something went wrong", error: error.message});
+    }
+}
+
+exports.getPostsByUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const posts = await prisma.post.findMany({
+            where: { userId: Number(userId) }
+        });
+
+        if(!posts){
+            res.status(200).json({message: "User does not have posts"});
+        }
+
+        res.status(200).json({message: "User's posts found", posts: posts});
+
+    } catch (error) {
+        res.status(500).json({message: "Something went wrong", error: error.message});
+    }
+}
+
 exports.createPost = async (req, res) => {
     try {
         const { title, question, status } = req.body;
