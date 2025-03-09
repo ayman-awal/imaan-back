@@ -1,20 +1,43 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+exports.getPostByPostId = async (req, res) => {
+    try {
+        const { postId } = req.params;
+
+        const post = await prisma.post.findUnique({
+            where: { id: Number(postId) }
+        });
+
+        if(!post){
+            return res.status(400).json({message: "Post does not exist"});
+        }
+
+        if(post.status === "unpublished"){
+            return res.status(400).json({message: "Post is not published yet"});
+        }
+
+        return res.status(200).json({message: "Post found", post: post});
+
+    } catch (error) {
+        return res.status(500).json({message: 'Something went wrong', error: error.message});
+    }
+}
+
 exports.getPublishedPosts = async (req, res) => {
     try {
         const posts = await prisma.post.findMany({
             where: { status: "published" }
         });
         
-        if(!posts){
-            res.status(200).json({message: "No published posts yet", posts: posts});
+        if(posts.length == 0){
+            return res.status(200).json({message: "No published posts yet"});
         }
 
-        res.status(200).json({message: "Published posts found", posts: posts});
+        return res.status(200).json({message: "Published posts found", posts: posts});
 
     } catch (error) {
-        res.status(500).json({message: "Something went wrong", error: error.message});
+        return res.status(500).json({message: "Something went wrong", error: error.message});
     }
 }
 
@@ -24,14 +47,14 @@ exports.getUnpublishedPosts = async (req, res) => {
             where: { status: "unpublished" }
         });
         
-        if(!posts){
-            res.status(200).json({message: "No pending posts", posts: posts});
+        if(posts.length == 0){
+            return res.status(200).json({message: "No pending posts"});
         }
 
-        res.status(200).json({message: "Unpublished posts found", posts: posts});
+        return res.status(200).json({message: "Unpublished posts found", posts: posts});
 
     } catch (error) {
-        res.status(500).json({message: "Something went wrong", error: error.message});
+        return res.status(500).json({message: "Something went wrong", error: error.message});
     }
 }
 
@@ -43,14 +66,14 @@ exports.getPostsByUser = async (req, res) => {
             where: { userId: Number(userId) }
         });
 
-        if(!posts){
-            res.status(200).json({message: "User does not have posts"});
+        if(posts.length == 0){
+            return res.status(200).json({message: "User does not have posts"});
         }
 
-        res.status(200).json({message: "User's posts found", posts: posts});
+        return res.status(200).json({message: "User's posts found", posts: posts});
 
     } catch (error) {
-        res.status(500).json({message: "Something went wrong", error: error.message});
+        return res.status(500).json({message: "Something went wrong", error: error.message});
     }
 }
 
