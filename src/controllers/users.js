@@ -65,14 +65,32 @@ exports.getProfile = async (req, res) => {
         });
     
         const posts = await prisma.post.findMany({
-            where: { userId: req.userId }
+            where: { userId: req.userId },
+            orderBy: {
+                createdAt: "desc"
+            }
         });
     
-        return res.status(200).json({ message: "Profile found", user: { name: user.name, email: user.email, posts: posts} });
+        return res.status(200).json({ message: "Profile found", user: { name: user.name, email: user.email, accountCreated: user.createdAt, role: user.user_type}, posts: posts });
     } catch (error) {
         return res.status(500).json({ message: "Something went wrong", error: error.message});
     }
+}
 
+exports.getProfileByUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId }
+        });
     
-
+        const posts = await prisma.post.findMany({
+            where: { userId }
+        });
+    
+        return res.status(200).json({ message: "Profile found", user: { name: user.name, email: user.email, accountCreated: user.createdAt, role: user.user_type}, posts: posts });
+    } catch (error) {
+        return res.status(500).json({ message: "Something went wrong", error: error.message});
+    }
 }

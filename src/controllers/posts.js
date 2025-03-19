@@ -27,11 +27,14 @@ exports.getPostByPostId = async (req, res) => {
 exports.getPublishedPosts = async (req, res) => {
     try {
         const posts = await prisma.post.findMany({
-            where: { status: "published" }
+            where: { status: "published" },
+            orderBy: {
+                publishedAt: "desc"
+            }
         });
         
         if(posts.length == 0){
-            return res.status(200).json({message: "No published posts yet"});
+            return res.status(200).json({message: "No published posts yet", posts: []});
         }
 
         return res.status(200).json({message: "Published posts found", posts: posts});
@@ -44,7 +47,10 @@ exports.getPublishedPosts = async (req, res) => {
 exports.getUnpublishedPosts = async (req, res) => {
     try {
         const posts = await prisma.post.findMany({
-            where: { status: "unpublished" }
+            where: { status: "unpublished" },
+            orderBy: {
+                createdAt: "desc"
+            }
         });
         
         if(posts.length == 0){
@@ -149,12 +155,36 @@ exports.changePostStatus = async (req, res) => {
 
         const updatedPost = await prisma.post.update({
             where: { id: Number(postId) },
-            data: { status }
+            data: { 
+                status,
+                publishedAt: new Date().toISOString()
+             }
         });
 
-        return res.status(200).json({ message: 'Post status updated successfully', updatedPost });
+        return res.status(200).json({ message: 'Post status updated successfully', post: updatedPost });
 
     } catch (error) {
         return res.status(500).json({message: 'Something went wrong', error: error.message});
     }
+}
+
+exports.getUnpublishedPostById = async (req, res) => {
+    try {
+        const { postId } = req.params;
+
+        const post = await prisma.post.findUnique({
+            where:{ id: Number(postId) },
+        });
+
+        if(!post){
+            return res.status(400).json({message: 'Post does not exist'});
+        }
+
+        return res.status(200).json({ message: 'Unpublished post found', post: post });
+
+
+    } catch (error) {
+        return res.status(500).json({message: 'Something went wrong', error: error.message});
+    }
+
 }

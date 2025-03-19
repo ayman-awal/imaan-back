@@ -8,7 +8,8 @@ const {
   getPublishedPosts,
   getUnpublishedPosts,
   getPostsByUser,
-  getPostByPostId
+  getPostByPostId,
+  getUnpublishedPostById
 } = require("../controllers/posts");
 
 router.post("/post", authenticate, createPost);
@@ -16,8 +17,9 @@ router.put("/status/:postId", requireAdmin, changePostStatus);
 router.put("/answer/:postId", requireAdmin, draftAnswer);
 
 router.get("/feed", authenticate, getPublishedPosts);
-router.get("/:postId", authenticate, getPostByPostId);
 router.get("/unpublished", requireAdmin, getUnpublishedPosts);
+router.get("/unpublished/:postId", requireAdmin, getUnpublishedPostById);
+router.get("/:postId", authenticate, getPostByPostId);
 router.get("/:userId", requireAdmin, getPostsByUser);
 
 module.exports = router;
