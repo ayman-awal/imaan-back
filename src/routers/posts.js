@@ -16,10 +16,10 @@ router.post("/post", authenticate, createPost);
 router.put("/status/:postId", requireAdmin, changePostStatus);
 router.put("/answer/:postId", requireAdmin, draftAnswer);
 
-router.get("/feed", authenticate, getPublishedPosts);
+router.get("/feed", getPublishedPosts);
 router.get("/unpublished", requireAdmin, getUnpublishedPosts);
 router.get("/unpublished/:postId", requireAdmin, getUnpublishedPostById);
-router.get("/:postId", authenticate, getPostByPostId);
+router.get("/:postId", getPostByPostId);
 router.get("/:userId", requireAdmin, getPostsByUser);
 
 module.exports = router;
