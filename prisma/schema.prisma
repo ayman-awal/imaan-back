@@ -14,24 +14,34 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  user_type String   @default("user")
-  createdAt DateTime @default(now())
-  posts     Post[]
+  id           Int         @id @default(autoincrement())
+  name         String
+  email        String      @unique
+  password     String
+  user_type    String      @default("user")
+  createdAt    DateTime    @default(now())
+  posts        Post[]
+  bookmarks    Bookmark[]
 }
 
 model Post {
-  id          Int      @id @default(autoincrement())
-  title       String
-  question    String
-  answer      String   @default("")
-  views       String   @default("0")
-  createdAt   DateTime @default(now())
-  publishedAt String   @default("")
-  status      String   @default("unpublished")
-  userId      Int
-  user        User     @relation(fields: [userId], references: [id])
+  id            Int         @id @default(autoincrement())
+  title         String
+  question      String
+  answer        String      @default("")
+  views         String      @default("0")
+  createdAt     DateTime    @default(now())
+  publishedAt   String      @default("")
+  status        String      @default("unpublished")
+  userId        Int
+  user          User        @relation(fields: [userId], references: [id])
+  bookmarks     Bookmark[]
+}
+
+model Bookmark {
+  id       Int      @id @default(autoincrement())
+  userId   Int
+  postId   Int
+  user     User     @relation(fields: [userId], references: [id])
+  post     Post     @relation(fields: [postId], references: [id])
 }

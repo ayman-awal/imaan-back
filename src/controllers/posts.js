@@ -1,6 +1,81 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+exports.bookmarkPost = async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const userId = req.userId;
+
+        const postExists = await prisma.post.findUnique({
+            where: { id: parseInt(postId) },
+        });
+
+        if (!postExists) {
+            return res.status(400).json({message: 'Post does not exist'});
+        }
+
+        const existing = await prisma.bookmark.findFirst({
+            where: {
+                userId: parseInt(userId),
+                postId: parseInt(postId),
+            },
+        });
+
+        if (existing){
+            return res.status(400).json({message: 'Post already bookmarked'});
+        }
+
+        const bookmark = await prisma.bookmark.create({
+            data: {
+              user: { connect: { id: userId } },
+              post: { connect: { id: parseInt(postId) } }
+            }
+        });
+        
+        return res.status(200).json({message: 'Post successfully bookmarked', post: postId, user: userId});
+
+    } catch (error) {
+        return res.status(500).json({message: 'Something went wrong', error: error.message});
+    }
+}
+
+exports.unbookmarkPost = async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const userId = req.userId;
+
+        const postExists = await prisma.post.findUnique({
+            where: { id: parseInt(postId) }
+        });
+
+        if (!postExists) {
+            return res.status(400).json({message: 'Post does not exist'});
+        }
+
+        const existing = await prisma.bookmark.findFirst({
+            where: {
+                userId: parseInt(userId),
+                postId: parseInt(postId),
+            }
+        });
+
+        if(!existing){
+            return res.status(400).json({message: 'Post already bookmarked'});
+        }
+
+        const deleteBookmark= await prisma.bookmark.delete({
+            where: {
+              id: existing.id,
+            },
+          })
+        
+        return res.status(200).json({message: 'Bookmark removed'});
+
+    } catch (error) {
+        return res.status(500).json({message: 'Something went wrong', error: error.message});
+    }
+}
+
 exports.getPostByPostId = async (req, res) => {
     try {
         const { postId } = req.params;

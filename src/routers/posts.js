@@ -9,12 +9,17 @@ const {
   getUnpublishedPosts,
   getPostsByUser,
   getPostByPostId,
-  getUnpublishedPostById
+  getUnpublishedPostById,
+  bookmarkPost,
+  unbookmarkPost
 } = require("../controllers/posts");
 
 router.post("/post", authenticate, createPost);
 router.put("/status/:postId", requireAdmin, changePostStatus);
 router.put("/answer/:postId", requireAdmin, draftAnswer);
+
+router.post("/bookmark/:postId", authenticate, bookmarkPost);
+router.post("/unbookmark/:postId", authenticate, unbookmarkPost);
 
 router.get("/feed", getPublishedPosts);
 router.get("/unpublished", requireAdmin, getUnpublishedPosts);
