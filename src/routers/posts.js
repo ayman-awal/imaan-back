@@ -11,7 +11,8 @@ const {
   getPostByPostId,
   getUnpublishedPostById,
   bookmarkPost,
-  unbookmarkPost
+  unbookmarkPost,
+  getBookmarks,
 } = require("../controllers/posts");
 
 router.post("/post", authenticate, createPost);
@@ -20,6 +21,7 @@ router.put("/answer/:postId", requireAdmin, draftAnswer);
 
 router.post("/bookmark/:postId", authenticate, bookmarkPost);
 router.post("/unbookmark/:postId", authenticate, unbookmarkPost);
+router.get("/bookmarks", authenticate, getBookmarks);
 
 router.get("/feed", getPublishedPosts);
 router.get("/unpublished", requireAdmin, getUnpublishedPosts);

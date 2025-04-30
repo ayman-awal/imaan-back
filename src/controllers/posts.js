@@ -1,6 +1,33 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+exports.getBookmarks = async (req, res) => {
+    try {
+        const userId = req.userId;
+
+        const bookmarks = await prisma.bookmark.findMany({
+            where: { userId: parseInt(userId) },
+            include: { post: true },
+            orderBy: {
+                createdAt: "desc"
+            }
+        });
+
+        const posts = bookmarks.map(b => b.post);
+
+        return res.status(200).json({ message: 'Bookmarks fetched', posts });
+
+        // if(bookmarks.length == 0){
+        //     return res.status(200).json({message: 'No posts bookmarked yet', bookmarks: []});
+        // }
+
+        // return res.status(200).json({message: 'Bookmarks fetched', bookmarks: bookmarks});
+
+    } catch (error) {
+        return res.status(500).json({message: 'Something went wrong', error: error.message});
+    }
+}
+
 exports.bookmarkPost = async (req, res) => {
     try {
         const { postId } = req.params;
