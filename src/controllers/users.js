@@ -3,6 +3,38 @@ const prisma = new PrismaClient();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
+exports.changePassword = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+
+    if(!passwordMatch){
+      return res.status(400).json({ message: "Current password is wrong" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    const updatedPassword = await prisma.user.update({
+      where: { id: Number(userId) },
+      data: { 
+          password: hashedPassword
+       }
+    });
+
+    return res.status(200).json({ message: "Password changed successfully" });
+
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong", error: error.message });
+  }
+}
+
 exports.userRegister = async (req, res) => {
   try {
     const { name, email, password, user_type } = req.body;
@@ -69,6 +101,9 @@ exports.userLogin = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
   try {
+
+    const userId = req.userId;
+
     const user = await prisma.user.findUnique({
       where: { email: req.email },
     });
@@ -92,6 +127,16 @@ exports.getProfile = async (req, res) => {
       [[], []]
     );
 
+    const bookmarks = await prisma.bookmark.findMany({
+      where: { userId: parseInt(userId) },
+      include: { post: true },
+      orderBy: {
+          createdAt: "desc"
+      }
+    });
+
+    const bookmarkedPosts = bookmarks.map(b => b.post);
+
     return res.status(200).json({
       message: "Profile found",
       user: {
@@ -103,7 +148,8 @@ exports.getProfile = async (req, res) => {
       posts: {
         answered,
         unanswered,
-      },
+        bookmarks: bookmarkedPosts
+      }
     });
   } catch (error) {
     return res

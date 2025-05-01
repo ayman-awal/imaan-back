@@ -15,13 +15,7 @@ exports.getBookmarks = async (req, res) => {
 
         const posts = bookmarks.map(b => b.post);
 
-        return res.status(200).json({ message: 'Bookmarks fetched', posts });
-
-        // if(bookmarks.length == 0){
-        //     return res.status(200).json({message: 'No posts bookmarked yet', bookmarks: []});
-        // }
-
-        // return res.status(200).json({message: 'Bookmarks fetched', bookmarks: bookmarks});
+        return res.status(200).json({ message: 'Bookmarks fetched', bookmarks: posts });
 
     } catch (error) {
         return res.status(500).json({message: 'Something went wrong', error: error.message});
@@ -37,7 +31,7 @@ exports.bookmarkPost = async (req, res) => {
             where: { id: parseInt(postId) },
         });
 
-        if (!postExists) {
+        if (!postExists || postExists.status == "unpublished") {
             return res.status(400).json({message: 'Post does not exist'});
         }
 
