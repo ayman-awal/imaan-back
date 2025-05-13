@@ -1,6 +1,30 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+exports.checkIfBookmarked = async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const userId = req.userId;
+
+        const isBookmarked = await prisma.bookmark.findFirst({
+            where: {
+                userId: parseInt(userId),
+                postId: parseInt(postId),
+            }
+        });
+
+        if(!isBookmarked){
+            return res.status(200).json({ isBookmarked: false });
+        }
+        else{
+            return res.status(200).json({ isBookmarked: true });
+        }
+
+    } catch (error) {
+        return res.status(500).json({message: 'Something went wrong', error: error.message});
+    }
+}
+
 exports.getBookmarks = async (req, res) => {
     try {
         const userId = req.userId;

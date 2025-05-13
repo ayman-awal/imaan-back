@@ -2,6 +2,8 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const { v4: uuidv4 } = require("uuid");
+const sendEmail = require("../utils/sendEmail");
 
 exports.changePassword = async (req, res) => {
   try {
@@ -37,7 +39,7 @@ exports.changePassword = async (req, res) => {
 
 exports.userRegister = async (req, res) => {
   try {
-    const { name, email, password, user_type } = req.body;
+    const { firstName, lastName, email, gender, dateOfBirth,  password, user_type } = req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -47,19 +49,29 @@ exports.userRegister = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
+    const token = uuidv4();
+    const expiry = new Date(Date.now() + 1000 * 60 * 60 * 24);
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await prisma.user.create({
-      data: { name, email, password: hashedPassword, user_type },
+      data: { firstName, lastName, email, gender, dateOfBirth: new Date(dateOfBirth), password: hashedPassword, user_type: "user", emailVerifyToken: token, emailVerifyTokenExpiry: new Date(expiry) },
     });
 
-    return res
-      .status(201)
-      .json({ message: "User registered successfully", user: newUser });
+    await sendEmail({
+      to: newUser.email,
+      subject: "Verify your email",
+      html: `<p>Click to verify your email: 
+              <a href="http://localhost:5001/api/auth/verify-email?token=${token}">
+                Verify Email
+              </a>
+            </p>`,
+    });
+
+
+    return res.status(201).json({ message: "User registered successfully", user: newUser });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Something went wrong", error: error.message });
+    return res.status(500).json({ message: "Something went wrong", error: error.message });
   }
 };
 

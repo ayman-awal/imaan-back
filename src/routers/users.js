@@ -5,7 +5,7 @@ const {
   userRegister,
   userLogin,
   getProfile,
-  changePassword
+  changePassword,
   // getProfileByUser,
 } = require("../controllers/users");
 const { authenticate, requireAdmin } = require("../middleware/authMiddleware");

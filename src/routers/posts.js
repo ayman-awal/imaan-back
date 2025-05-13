@@ -13,6 +13,7 @@ const {
   bookmarkPost,
   unbookmarkPost,
   getBookmarks,
+  checkIfBookmarked
 } = require("../controllers/posts");
 
 router.post("/post", authenticate, createPost);
@@ -21,6 +22,7 @@ router.put("/answer/:postId", requireAdmin, draftAnswer);
 
 router.post("/bookmark/:postId", authenticate, bookmarkPost);
 router.post("/unbookmark/:postId", authenticate, unbookmarkPost);
+router.get("/check-bookmark/:postId", authenticate, checkIfBookmarked);
 router.get("/bookmarks", authenticate, getBookmarks);
 
 router.get("/feed", getPublishedPosts);
