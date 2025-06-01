@@ -45,8 +45,14 @@ exports.userRegister = async (req, res) => {
       where: { email },
     });
 
-    if (existingUser) {
+    if (existingUser && existingUser.isEmailVerified === true) {
       return res.status(400).json({ message: "User already exists" });
+    }
+
+    if(existingUser) {
+      const deleteUser = await prisma.user.delete({
+        where: { email },
+      })
     }
 
     const token = uuidv4();
@@ -68,8 +74,7 @@ exports.userRegister = async (req, res) => {
             </p>`,
     });
 
-
-    return res.status(201).json({ message: "User registered successfully", user: newUser });
+    return res.status(201).json({ message: `✅ A verification email has been sent to ${email}`, user: newUser });
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong", error: error.message });
   }
